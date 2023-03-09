@@ -15,23 +15,12 @@ namespace КТАД_lab_1
 
     public partial class Form2 : Form
     {
-        public static string library = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
-        int[] charactersCount = new int[library.Length];
-        string fileContent;
 
         public Form2()
         {
             InitializeComponent();
-
-        }
-        public Form2(int[] arr, string fileContent)
-        {
-            InitializeComponent();
             this.WindowState = FormWindowState.Normal;
-            Array.Copy(arr, 0, charactersCount, 0, arr.Length);
-            this.fileContent = fileContent;
         }
-
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
         {
 
@@ -44,68 +33,93 @@ namespace КТАД_lab_1
 
         private void Form2_Load(object sender, EventArgs e)
         {
-
-            for (int i = 0; i < library.Length; i++)
+            textBox1.AppendText("Символ\t|Kx\t|Pn" + Environment.NewLine);
+            for (int i = 0; i < Form1.characters.Count; i++)
             {
-                var character = new Label();
-                character.BorderStyle = BorderStyle.FixedSingle;
-                character.Margin = new Padding(0);
-                character.Text = library[i].ToString();
-                character.BackColor = Color.CornflowerBlue;
-
-                var occurances = new Label();
-                occurances.BorderStyle = BorderStyle.FixedSingle;
-                occurances.Margin = new Padding(0);
-                occurances.BackColor = Color.CornflowerBlue;
-                occurances.Text = charactersCount[i].ToString();
-
-                var ocurr_percent = new Label();
-                ocurr_percent.BorderStyle = BorderStyle.FixedSingle;
-                ocurr_percent.Margin = new Padding(0);
-                ocurr_percent.BackColor = Color.CornflowerBlue;
-                if (charactersCount[i] == 0)
-                    ocurr_percent.Text = "0";
+                string temp;
+                if (Form1.library[i] == '\n')
+                    temp = "\"enter\"" + "\t|" + Form1.characters[Form1.library[i]] + "\t|" + Math.Round(Form1.characters[Form1.library[i]] / (decimal)Form1.fileContent.Length, 5);
+                else if(Form1.library[i] == '\r')
+                    temp = "\"return\"" + "\t|" + Form1.characters[Form1.library[i]] + "\t|" + Math.Round(Form1.characters[Form1.library[i]] / (decimal)Form1.fileContent.Length, 5);
+                else if (Form1.library[i] == ' ')
+                    temp = "\"space\"" + "\t|" + Form1.characters[Form1.library[i]] + "\t|" + Math.Round(Form1.characters[Form1.library[i]] / (decimal)Form1.fileContent.Length, 5);
                 else
-                    ocurr_percent.Text = Math.Round((double)charactersCount[i] / fileContent.Length, 6).ToString(); ;
-
-
-                if (i % 2 == 1)
-                {
-                    //tableLayoutPanel2.ColumnStyles[i/2].Width = 500;
-                    tableLayoutPanel2.Controls.Add(character, i / 2 + 1, 1);
-                    tableLayoutPanel2.Controls.Add(occurances, i / 2 + 1, 2);
-                    tableLayoutPanel2.Controls.Add(ocurr_percent, i / 2 + 1, 3);
-                }
-                else
-                {
-                    tableLayoutPanel4.Controls.Add(character, i / 2 + 1, 1);
-                    tableLayoutPanel4.Controls.Add(occurances, i / 2 + 1, 2);
-                    tableLayoutPanel4.Controls.Add(ocurr_percent, i / 2 + 1, 3);
-                }
-
-
+                    temp = "\"" + Form1.library[i] + "\"" + "\t|" + Form1.characters[Form1.library[i]] + "\t|" + Math.Round(Form1.characters[Form1.library[i]] / (decimal)Form1.fileContent.Length, 5);
+                textBox1.AppendText(temp + Environment.NewLine);
             }
-            tableLayoutPanel2.Update();
-            tableLayoutPanel4.Update();
+            int letterCount = 0;
+            Form1.library.ToCharArray().ToList().ForEach(delegate (char i) {
+                letterCount += Form1.characters[i];
+            });
+            label1.Text = "Всього символів: " + letterCount;
+            label2.Text = "Pn MAX: " + FindAllMax();
+            label3.Text = "Pn MIN: " + FindAllMin();
 
-            tableLayoutPanel2.Controls.Add(new Label() { Text = "Char" }, 0, 1);
-            tableLayoutPanel2.Controls.Add(new Label() { Text = "Ki" }, 0, 2);
-            tableLayoutPanel2.Controls.Add(new Label() { Text = "Pn" }, 0, 3);
+        }
 
-            tableLayoutPanel4.Controls.Add(new Label() { Text = "Char" }, 0, 1);
-            tableLayoutPanel4.Controls.Add(new Label() { Text = "Ki" }, 0, 2);
-            tableLayoutPanel4.Controls.Add(new Label() { Text = "Pn" }, 0, 3);
-
-
-            label1.Text = "Всього символів: " + charactersCount.Sum().ToString();
-            label3.Text = "Pn Min: ";
-            label2.Text = "Pn Max: " + library[Array.IndexOf(charactersCount, charactersCount.Max())];
-            for (int i = 0; i < GetMinIndexes(charactersCount).Count; i++)
+        private string FindAllMin()
+        {
+            int min = 1;
+            List<char> list = new List<char>();
+            foreach (var item in Form1.library)
             {
-                label3.Text += library[GetMinIndexes(charactersCount)[i]] + " ";
+                if (min > Form1.characters[item] && Form1.characters[item] != 0)
+                {
+                    min = Form1.characters[item];
+                }
             }
-            DrawBarChart(charactersCount);
-
+            foreach (var item in Form1.library)
+            {
+                if (min == Form1.characters[item])
+                {
+                    list.Add(item);
+                }
+            }
+            string result = string.Empty;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] == '\n')
+                    result += "\"enter\" ";
+                else if (list[i] == '\r')
+                    result += "\"return\" ";
+                else if (list[i] == ' ')
+                    result += "\"space\" ";
+                else
+                    result += "\"" + list[i] + "\" ";
+            }
+            return result;
+        }
+        private string FindAllMax()
+        {
+            int max = Form1.characters[Form1.library[0]];
+            List<char> list = new List<char>();
+            foreach (var item in Form1.library)
+            {
+                if (max < Form1.characters[item])
+                {
+                    max = Form1.characters[item];
+                }
+            }
+            foreach (var item in Form1.library)
+            {
+                if (max == Form1.characters[item])
+                {
+                    list.Add(item);
+                }
+            }
+            string result = string.Empty;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] == '\n')
+                    result += "\"enter\" ";
+                else if (list[i] == '\r')
+                    result += "\"return\" ";
+                else if (list[i] == ' ')
+                    result += "\"space\" ";
+                else
+                    result += "\"" + list[i] + "\" ";
+            }
+            return result;
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -133,35 +147,7 @@ namespace КТАД_lab_1
 
         }
 
-        private void DrawBarChart(int[] letterCount)
-        {
-            chartContainer.Controls.Clear();
-
-            Chart chart = new Chart();
-            chart.Dock = DockStyle.Fill;
-
-            ChartArea chartArea = new ChartArea();
-            chartArea.Name = "Кількість символів";
-            chartArea.AxisX.Title = "Символи";
-            chartArea.AxisY.Title = "%";
-
-            chart.ChartAreas.Add(chartArea);
-
-            Series series = new Series();
-            series.Name = "Символи";
-            series.ChartType = SeriesChartType.Column;
-            chart.Series.Add(series);
-            chart.ChartAreas[0].AxisX.LabelStyle.Interval = 1;
-
-            for (int i = 0; i < letterCount.Length; i++)
-            {
-                series.Points.AddXY(i, 100 * Math.Round((double)charactersCount[i] / fileContent.Length, 3));
-                series.Points[i].AxisLabel = library[i].ToString();
-            }
-
-            chart.Dock = DockStyle.Fill;
-            chartContainer.Controls.Add(chart);
-        }
+        
         private static List<int> GetMinIndexes(int[] arr)
         {
             List<int> minIndexes = new List<int>();
@@ -186,6 +172,11 @@ namespace КТАД_lab_1
             }
 
             return minIndexes;
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

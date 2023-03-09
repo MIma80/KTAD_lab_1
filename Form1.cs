@@ -13,22 +13,20 @@ namespace КТАД_lab_1
 {
     public partial class Form1 : Form
     {
-        public string filePath;
-        public string fileContent;
-        public static string library = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
-        public int[] charCount = new int[library.Length];
-        public HashSet<char> characters = new HashSet<char>() {};
+        public static string filePath;
+        public static string fileContent;
+        public static string library;
+        public static Dictionary<char, int> characters = new Dictionary<char, int>();
         public Form1()
         {
             InitializeComponent();
-            foreach (var item in library)
-            {
-                characters.Add(item);
-            }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            fileContent = string.Empty;
+            ClearDictionaryAndLibrary();
+
             openFileDialog1 = new OpenFileDialog();
             openFileDialog1.Filter = "txt files (*.txt)|*.txt";
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
@@ -39,12 +37,16 @@ namespace КТАД_lab_1
                 {
                     fileContent = reader.ReadToEnd();
                 }
-                List<char> list = fileContent.ToCharArray().ToList();
-                list.RemoveAll(p => library.Contains(p) == false);
-                fileContent = String.Empty;
-                for (int i = 0; i < list.Count; i++)
+                for (int i = 0; i < fileContent.Length; i++)
                 {
-                    fileContent += list[i];
+                    if (characters.ContainsKey(fileContent[i]))
+                        characters[fileContent[i]]++;
+                    else
+                    {
+                        characters.Add(fileContent[i], 1);
+                        library += fileContent[i];
+                    }
+                        
                 }
                 label3.Text = "Обраний файл: " + filePath.Remove(0, filePath.LastIndexOf("\\") + 1);
             }
@@ -53,19 +55,11 @@ namespace КТАД_lab_1
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (fileContent == null)
+            if (fileContent == string.Empty)
             {
                 return;
             }
-            Array.Clear(charCount, 0, charCount.Length);
-            foreach (char character in fileContent)
-            {
-                if (characters.Contains(character))
-                {
-                    charCount[library.IndexOf(character)]++;
-                }
-            }
-            Form2 form = new Form2(charCount, fileContent);
+            Form2 form = new Form2();
             form.Show();
         }
 
@@ -77,6 +71,23 @@ namespace КТАД_lab_1
         private void label3_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (fileContent == string.Empty)
+            {
+                return;
+            }
+            Form3 form = new Form3();
+            form.Show();
+        }
+        private void ClearDictionaryAndLibrary()
+        {
+            library = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZzАаБбВвГгҐґДдЕеЄєЖжЗзИиІіЇїЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщьЮюЯя ,<>?!{}[]\';:\"";
+            characters.Clear();
+            foreach (var charecter in library)
+            characters.Add(charecter, 0);
         }
     }
 }
